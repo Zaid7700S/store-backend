@@ -20,4 +20,4 @@ EXPOSE 8080
 ENV ASPNETCORE_HTTP_PORTS=8080
 
 COPY --from=build /app/publish .
-ENTRYPOINT ["dotnet", "YourProjectName.dll"]
+ENTRYPOINT ["dotnet", "store.dll"]
