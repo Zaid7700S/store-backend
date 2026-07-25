@@ -88,6 +88,9 @@ app.UseHttpsRedirection();
 // ==========================================
 // 2. APPLY CORS POLICY (Must be placed BEFORE Auth)
 // ==========================================
+
+app.UseRouting();
+
 app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
