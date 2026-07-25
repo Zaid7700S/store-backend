@@ -83,11 +83,10 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
-
-// ==========================================
-// 2. APPLY CORS POLICY (Must be placed BEFORE Auth)
-// ==========================================
+// 1. DISABLE HTTPS REDIRECTION ON RENDER
+// Render handles SSL termination at the load balancer. 
+// Leaving this enabled inside the container strips CORS headers.
+// app.UseHttpsRedirection(); 
 
 app.UseRouting();
 
@@ -98,6 +97,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapHub<store.Hubs.SupportChatHub>("/chathub");
+// 2. EXPLICITLY BIND CORS TO THE HUB
+app.MapHub<store.Hubs.SupportChatHub>("/chathub").RequireCors("AllowFrontend");
 
 app.Run();
