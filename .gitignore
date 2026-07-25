@@ -1,0 +1,18 @@
+# Build folders
+bin/
+obj/
+
+# Local configuration and secrets
+appsettings.Development.json
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Local databases (if using SQLite locally)
+*.db
+*.db-shm
+*.db-wal
+
+# Mac OS files (just in case)
+.DS_Store
