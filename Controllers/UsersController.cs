@@ -74,6 +74,7 @@ namespace store.Controllers
                         {
                             Name = u.Name,
                             userName = u.userName,
+                            Email = u.Email,
                             ProfilePictureUrl = u.ProfilePictureUrl
                             
                         })
@@ -90,26 +91,27 @@ namespace store.Controllers
         {
             if (newUser is null)
                 return BadRequest();
-
-            var userExists = await _context.Users.AnyAsync(x => x.userName == newUser.userName);
-
+        
+            // CHECK IF EITHER USERNAME OR EMAIL IS ALREADY TAKEN
+            var userExists = await _context.Users.AnyAsync(x => x.userName == newUser.userName || x.Email == newUser.Email);
+        
             if (userExists)
-                return BadRequest("Username taken");
-
+                return BadRequest("Username or Email already taken");
+        
             var user = new Users
             {
                 Name = newUser.Name,
                 userName = newUser.userName,
+                Email = newUser.Email, // ADDED EMAIL HERE
                 password = BCrypt.Net.BCrypt.HashPassword(newUser.password),
                 Role = UserRole.Customer
             };
-
+        
             _context.Users.Add(user);
-
             await _context.SaveChangesAsync();
-
+        
             user.password = "";
-
+        
             return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
         }
 
@@ -157,31 +159,30 @@ namespace store.Controllers
         }
 
         [HttpPost("Login")]
-
         public async Task<IActionResult> Login(LoginDto request)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.userName == request.userName);
-
+            // ALLOW LOGIN VIA USERNAME OR EMAIL
+            var user = await _context.Users.FirstOrDefaultAsync(x => 
+                x.userName == request.userName || x.Email == request.userName);
+        
             if (user is null)
                 return Unauthorized("Invalid Username or Password");
-
+        
             bool isPasswordValid = BCrypt.Net.BCrypt.Verify(request.password, user.password);
-
+        
             if (!isPasswordValid)
                 return Unauthorized("Invalid Username or Password");
-
+        
             var jwt = _authService.GenerateJwtToken(user);
-
             var refreshToken = _authService.GenerateRefreshToken();
-
+        
             user.RefreshToken = refreshToken;
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
-
+        
             await _context.SaveChangesAsync();
-
+        
             return Ok(new { accessToken = jwt, refreshToken = refreshToken });
         }
-
 
         [HttpPost("refresh-token")]
 
