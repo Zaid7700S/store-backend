@@ -89,10 +89,17 @@ namespace store.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<Users>> SignUp(CreateUserDto newUser)
         {
-            if (newUser is null)
-                return BadRequest();
+            // ==========================================
+            // 1. ADD STRICT EMPTY STRING VALIDATION
+            // ==========================================
+            if (newUser is null || 
+                string.IsNullOrWhiteSpace(newUser.userName) || 
+                string.IsNullOrWhiteSpace(newUser.Email) || 
+                string.IsNullOrWhiteSpace(newUser.password))
+            {
+                return BadRequest("All fields are required.");
+            }
         
-            // CHECK IF EITHER USERNAME OR EMAIL IS ALREADY TAKEN
             var userExists = await _context.Users.AnyAsync(x => x.userName == newUser.userName || x.Email == newUser.Email);
         
             if (userExists)
@@ -102,7 +109,7 @@ namespace store.Controllers
             {
                 Name = newUser.Name,
                 userName = newUser.userName,
-                Email = newUser.Email, // ADDED EMAIL HERE
+                Email = newUser.Email,
                 password = BCrypt.Net.BCrypt.HashPassword(newUser.password),
                 Role = UserRole.Customer
             };
@@ -114,7 +121,6 @@ namespace store.Controllers
         
             return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
         }
-
         [HttpPut("update-user")]
         [Authorize]
         public async Task<IActionResult> UpdateUser(UpdateUserDto updated)
