@@ -1,14 +1,19 @@
-[ApiController]
-[Route("health")]
-public class HealthController : ControllerBase
+using Microsoft.AspNetCore.Mvc;
+
+namespace store.Controllers
 {
-    [HttpGet]
-    public IActionResult Get()
+    [ApiController]
+    [Route("health")]
+    public class HealthController : ControllerBase
     {
-        return Ok(new
+        [HttpGet]
+        public IActionResult Get()
         {
-            status = "healthy",
-            timestamp = DateTime.UtcNow
-        });
+            return Ok(new
+            {
+                status = "healthy",
+                timestamp = DateTime.UtcNow
+            });
+        }
     }
 }
